@@ -132,7 +132,7 @@ This project is evaluated based on the following parameters (as per Codebasics R
 
 ## 🔗 License
 
-This project was created for educational and portfolio purposes as part of the [Codebasics Resume Challenge]([https://codebasics.io/](https://codebasics.io/challenge/codebasics-gen-ai-data-science-resume-project-challenge).  
+This project was created for educational and portfolio purposes as part of the [Codebasics Resume Challenge](https://codebasics.io/challenge/codebasics-gen-ai-data-science-resume-project-challenge).  
 All data used is fictional and intended for demonstration only.
 
 Feel free to fork and build upon this work, but please give proper credit.  
