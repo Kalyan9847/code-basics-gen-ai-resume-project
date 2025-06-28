@@ -1,6 +1,6 @@
 # 🤖 AI-Powered Internal Chatbot for FinSolve Technologies
 
-This project is a submission for the [Codebasics Resume Challenge]([https://codebasics.io](https://codebasics.io/challenge/codebasics-gen-ai-data-science-resume-project-challenge/), where the objective is to build an AI-powered internal chatbot with **role-based access control (RBAC)** and **Retrieval-Augmented Generation (RAG)** for enterprise-level data access.
+This project is a submission for the [Codebasics Resume Challenge](https://codebasics.io/challenge/codebasics-gen-ai-data-science-resume-project-challenge/), where the objective is to build an AI-powered internal chatbot with **role-based access control (RBAC)** and **Retrieval-Augmented Generation (RAG)** for enterprise-level data access.
 
 ---
 
