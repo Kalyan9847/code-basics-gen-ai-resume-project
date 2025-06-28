@@ -57,9 +57,12 @@ code-basics-gen-ai-resume-project/
 ├── c-level.py # C-Level Executive logic
 ├── general.py # General employee queries logic
 │
-├── text chunking and vectorization/
-│ ├── [scripts for data loading]
-│ └── [vector store creation logic using Chroma]
+└── text chunking and vectorization/
+├── engineering text chunking and vectorization.py
+├── finance chunking and vectorization.py
+├── general chunking and vectorization.py
+├── hr chunking and vectorizing.py
+└── marketing chunking and vectorizing.py
 ```
 
 ---
