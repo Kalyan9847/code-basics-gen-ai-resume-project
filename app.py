@@ -10,7 +10,8 @@ def get_backend_url(role):
     """
     # Note: The backend expects specific individual roles like 'finance', 'engineering', etc.
     # The 'C-Level Executives' string itself is not sent to the backend for a query.
-    return "http://127.0.0.1:8000/query" # All queries go to the same /query endpoint on backend
+    # return "https://end-points-render.onrender.com"
+    return f"http://127.0.0.1:8000/{role}/query" # All queries go to the same /query endpoint on backend
 
 
 # Page configuration for the Streamlit application
@@ -121,6 +122,12 @@ if 'messages' not in st.session_state:
 # New session state variable to track the previously selected *primary* role
 if "previous_primary_role" not in st.session_state:
     st.session_state.previous_primary_role = None
+
+# Authentication state variables
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "login_error" not in st.session_state:
+    st.session_state.login_error = ""
 
 
 def render_role_cards():
@@ -241,7 +248,7 @@ def render_role_cards():
         {
             'role': 'C-Level Executives',
             'icon': '🏆',
-            'title': 'C-Level Employee Management'
+            'title': 'C-Level Executive'
         },
         {
             'role': 'Finance Team',
@@ -304,21 +311,15 @@ def render_role_cards():
                 st.rerun() # Rerun the app to switch to the chat room
 
 
-def get_ai_response(prompt, role_for_backend):
-    """
-    Sends a query to the backend AI endpoint with the specified role and retrieves the AI's response.
-    The `role_for_backend` parameter should be the actual lowercase role string (e.g., "finance", "general")
-    that the backend expects.
-    """
-    url = get_backend_url(role_for_backend) # All queries go to the same /query endpoint
-
+def get_ai_response(prompt, role):
+    url = get_backend_url(role)
+    # role is already the backend key ("finance", "engineering", etc.)
     payload = {
-        "role": role_for_backend, # This is the role string like "finance", "general" etc.
+        "role": role,
         "query": prompt
     }
-
     try:
-        response = requests.post(url, json=payload, timeout=60) # Send POST request with JSON payload
+        response = requests.post(url, json=payload, timeout=60)
         if response.status_code == 200:
             return response.json().get("response", "No response from backend.")
         else:
@@ -396,16 +397,17 @@ def render_home_screen():
             flex: 1;
             max-width: 600px;
             color: #ddd;
-            font-size: 1.3rem;
+            font-size: 2.8rem;
             line-height: 1.6;
             text-align: left;
+            font-style: italic
         }
 
         /* Styling for introductory image container */
         .intro-image {
             flex: 1;
             max-width: 400px;
-            align-self: right;
+            align-self: self-end;
         }
                 
         .intro-image:hover {
@@ -445,7 +447,7 @@ def render_home_screen():
             <p>
                 Our AI-driven internal chatbot is built to empower teams across departments by delivering
                 accurate, role-specific insights in real-time. Whether you're from Finance, Marketing, HR, or Engineering —
-                FinSolve ensures that the data you need is always at your fingertips.
+                Our AI Chatbot ensures that the data you need is always at your fingertips.
             </p>
             <p>
                 Skip the delays, break the silos. With cutting-edge retrieval-augmented generation (RAG) technology,
@@ -453,7 +455,7 @@ def render_home_screen():
             </p>
         </div>
         <div class="intro-image">
-            <img src="https://images.jdmagicbox.com/comp/kolkata/j7/033pxx33.xx33.210424102113.l7j7/catalogue/finsolve-solutions-haridevpur-kolkata-income-tax-consultants-4w8tf5a6ho-250.jpg" alt="FinSolve Intro Image" />
+            <img src="https://www.abtosoftware.com/wp-content/uploads/Chatbot_mano.jpg" alt="FinSolve Intro Image" />
         </div>
     </div>
 
@@ -465,7 +467,7 @@ def get_role_icon(role):
     """Returns an emoji icon for the given role."""
     icons = {
         'C-Level Executives': '🏆',
-        'Finance Team': '�',
+        'Finance Team': '💰',
         'Marketing Team': '📈',
         'HR Team': '👥',
         'Engineering Department': '⚙️',
@@ -484,6 +486,46 @@ def get_role_description(role):
         'General': "General queries and support for all employees." # Using 'General' as the role key
     }
     return desc.get(role, "")
+
+
+def check_credentials(user_id, password, role):
+    if role.strip().lower() == "c-level-executives":
+        role = 'c-level'  #------------------------------------------made this change
+    expected_user_id = f"fin_{role}"
+    expected_password = f"fin_{role}@999"
+    if user_id != expected_user_id:
+        return False, "User ID is incorrect."
+    if password != expected_password:
+        return False, "Password is incorrect."
+    return True, ""
+
+def render_login_popup(role):
+    # Center the login box using columns
+    st.markdown(
+        """
+        <style>
+        .modal-fake {
+            background: #181f18;
+            padding: 2rem 2.5rem;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+            min-width: 350px;
+            text-align: center;
+            margin-top: 120px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    col1, col2, col3 = st.columns([2, 3, 2])
+    with col2:
+        st.markdown('<div class="modal-fake">''<h3 style="color: #10b981;">🔐 Secure Login</h3>', unsafe_allow_html=True)
+        st.markdown('<p style="color: #ccc;">Enter your User ID and Password to continue.</p>', unsafe_allow_html=True)
+        user_id = st.text_input("User ID", key="login_user_id")
+        password = st.text_input("Password", type="password", key="login_password")
+        login_btn = st.button("Login", key="login_btn")
+        st.markdown('</div>', unsafe_allow_html=True)
+    return user_id, password, login_btn
 
 def render_chat_room():
     """
@@ -562,6 +604,7 @@ def render_chat_room():
 
     with chat_header_cols[0]:
         # Back to Home button (always in the main chat area)
+        st.markdown('<div class="fixed-button">', unsafe_allow_html=True)
         if st.button("← Back to Home", key="back_to_home_main_area_common"): # Common key for all roles
             st.session_state.role = None # Clear the selected primary role
             st.session_state.messages = [] # Clear all chat messages
@@ -578,7 +621,7 @@ def render_chat_room():
         # Display the AI Assistant header
         st.markdown(
             f"<div class='chat-header'><h1>{header_role_icon} {header_role_name} AI Assistant</h1>"
-            f"<p>{header_role_description}</p></div>",
+            f"<p><h2>{header_role_description}</h2></p></div>",
             unsafe_allow_html=True
         )
 
@@ -613,17 +656,66 @@ def render_chat_room():
         with st.chat_message('assistant'):
             with st.spinner('Thinking...'): # Show a spinner while waiting for AI response
                 # Pass the dynamically determined backend role (e.g., "finance", "general")
-                resp = get_ai_response(prompt, actual_backend_role_to_send)
+                if st.session_state.role == "C-Level Executives":
+                    sub_role_display = st.session_state.get("c_level_sub_role_display", "Finance")
+                    role_map = {
+                        "Finance Team": "finance",
+                        "Engineering Department": "engineering",
+                        "Marketing Team": "marketing",
+                        "HR Team": "hr",
+                        "General": "general",
+                    }
+                    backend_role = role_map.get(sub_role_display, "finance")
+                else:
+                    role_map = {
+                        "Finance Team": "finance",
+                        "Engineering Department": "engineering",
+                        "Marketing Team": "marketing",
+                        "HR Team": "hr",
+                        "General": "general",
+                    }
+                    backend_role = role_map.get(st.session_state.role, "general")
+
+                resp = get_ai_response(prompt, backend_role)
                 st.markdown(resp)
         st.session_state.messages.append({'role': 'assistant', 'content': resp})
 
 # Main application flow based on session state
 if __name__ == "__main__":
     if st.session_state.role is None:
-        # If no role is selected, display the home screen and role selection cards
         render_home_screen()
         render_role_cards()
+        # Reset authentication if going back to home
+        st.session_state.authenticated = False
+        st.session_state.login_error = ""
     else:
-        # If a role is selected, display the chat room
-        render_chat_room()
+        # Map display role to backend role key
+        roles_for_backend_map = {
+            "C-Level Executives": "c-level-executives",
+            "Finance Team": "finance",
+            "Marketing Team": "marketing",
+            "HR Team": "hr",
+            "Engineering Department": "engineering",
+            "General": "general"
+        }
+        # Use the backend role key for authentication
+        role_key = roles_for_backend_map.get(st.session_state.role, "general")
 
+        if not st.session_state.authenticated:
+            user_id, password, login_btn = render_login_popup(role_key)
+            if login_btn:
+                valid, msg = check_credentials(user_id, password, role_key)
+                if valid:
+                    st.session_state.authenticated = True
+                    st.session_state.login_error = ""
+                    st.rerun()
+                else:
+                    st.session_state.login_error = msg
+            if st.session_state.login_error:
+                st.error(st.session_state.login_error)
+            st.stop()
+        else:
+            render_chat_room()
+
+
+# Use this front-end server
