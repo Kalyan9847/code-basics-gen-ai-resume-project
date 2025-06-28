@@ -43,6 +43,7 @@ FinSolve Technologies is a FinTech company facing delays in communication and si
 
 ## 🗂️ Repository Structure
 
+```
 code-basics-gen-ai-resume-project/
 │
 ├── app.py # Main FastAPI app
@@ -59,7 +60,7 @@ code-basics-gen-ai-resume-project/
 ├── text chunking and vectorization/
 │ ├── [scripts for data loading]
 │ └── [vector store creation logic using Chroma]
-
+```
 
 ---
 
