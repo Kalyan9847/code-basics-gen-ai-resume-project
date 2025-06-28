@@ -46,7 +46,7 @@ FinSolve Technologies is a FinTech company facing delays in communication and si
 ```
 code-basics-gen-ai-resume-project/
 │
-├── app.py # Main FastAPI app
+├── app.py # Main Streamlit app
 ├── .env # Environment file for Gemini API key
 ├── README.md # Project documentation (you are here)
 │
